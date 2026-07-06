@@ -6,6 +6,8 @@ This project implements the **Count-Min Sketch (CMS)** probabilistic data struct
 
 Count-Min Sketch is a memory-efficient streaming algorithm widely used in networking, databases, and cybersecurity to estimate item frequencies without storing every observation. This implementation demonstrates how CMS can serve as a first-line defence for identifying potentially suspicious IP addresses in high-volume network streams.
 
+In addition to the core implementation, this repository includes an **experimental evaluation** that investigates the trade-off between memory usage and detection precision by varying the number and size of Count-Min Sketch tables.
+
 ---
 
 ## Features
@@ -16,6 +18,7 @@ Count-Min Sketch is a memory-efficient streaming algorithm widely used in networ
 - Streaming updates with constant-time insertion
 - Configurable sketch dimensions (number and size of hash tables)
 - Dynamic memory allocation and cleanup
+- Experimental evaluation of memory–precision trade-offs
 
 ---
 
@@ -35,25 +38,51 @@ This implementation follows the Count-Min Sketch algorithm introduced by **Cormo
 ## Repository Structure
 
 ```
-Count-Min-Sketch-Network-Monitor/
+Network-Traffic-Monitoring/
 
 ├── README.md
 ├── Makefile
 ├── .gitignore
+├── report.pdf
 │
 ├── src/
-│   └── cms.c
+│   ├── cms.c
+│   └── cms_experiment.c
 │
 └── examples/
     ├── input.txt
-    └── output.txt
+    ├── output.txt
+    ├── experiment_input.txt
+    └── experiment_output.txt
 ```
+
+---
+
+## Files
+
+### `cms.c`
+
+Implements the core Count-Min Sketch algorithm for streaming IP address frequency estimation and threshold-based detection.
+
+### `cms_experiment.c`
+
+Evaluates the performance of Count-Min Sketch by varying:
+
+- Number of hash tables
+- Hash table size
+- Memory usage
+
+The program outputs CSV-formatted results that can be used to analyse the trade-off between memory consumption and detection precision.
+
+### `report.pdf`
+
+A short report describing the implementation, experimental methodology, and evaluation of the Count-Min Sketch algorithm.
 
 ---
 
 ## Building
 
-Compile the project using the included Makefile:
+Compile both programs using the included Makefile:
 
 ```bash
 make
@@ -62,17 +91,36 @@ make
 Alternatively, compile manually:
 
 ```bash
-gcc -Wall -o cms src/cms.c -lm
+gcc -Wall -O2 -o cms src/cms.c -lm
+gcc -Wall -O2 -o cms_experiment src/cms_experiment.c -lm
 ```
 
 ---
 
 ## Running
 
-Run the program using the example input:
+Run the main implementation:
+
+```bash
+make run
+```
+
+or
 
 ```bash
 ./cms < examples/input.txt
+```
+
+Run the experimental evaluation:
+
+```bash
+make run-experiment
+```
+
+or
+
+```bash
+./cms_experiment < examples/experiment_input.txt
 ```
 
 ---
@@ -83,6 +131,37 @@ Run the program using the example input:
 Flagging ip address: 192.168.001.001 up to 8 accesses.
 ```
 
+Example experimental output:
+
+```
+num_tables,table_size,memory,precision
+4,100,1600,0.974
+6,200,4800,0.993
+...
+```
+
+---
+
+## Experimental Results
+
+The figure below illustrates the relationship between memory allocated to the Count-Min Sketch and detection accuracy. As table size increases, memory increases, hash collisions decrease, leading to more accurate frequency estimates.
+
+![Accuracy vs Memory](results/accuracy_vs_memory.png)
+
+*Figure 1. Detection accuracy as a function of Count-Min Sketch memory allocation.*
+
+---
+
+## Time and Space Complexity
+
+For a Count-Min Sketch with **d** hash tables and width **w**:
+
+| Operation | Complexity |
+|-----------|-----------:|
+| Insert | O(d) |
+| Query | O(d) |
+| Memory | O(d × w) |
+
 ---
 
 ## Technologies
@@ -92,6 +171,7 @@ Flagging ip address: 192.168.001.001 up to 8 accesses.
 - Hash Functions
 - Streaming Algorithms
 - Probabilistic Data Structures
+- Algorithm Performance Evaluation
 
 ---
 
@@ -103,6 +183,8 @@ Flagging ip address: 192.168.001.001 up to 8 accesses.
 - Memory-Efficient Algorithm Design
 - Hash-Based Data Structures
 - Algorithm Analysis
+- Experimental Evaluation
+- Performance Benchmarking
 
 ---
 
